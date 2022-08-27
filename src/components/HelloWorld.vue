@@ -33,6 +33,17 @@
                   tokenURI: {{ currentTokenId }}
                 </div>
               </div>
+              <div style="margin: 24px 0; display: flex; justify-content: center">
+                <button v-on:click="mint">mint</button>
+                <div style="display: flex; flex-direction: column">
+                  <input type="text" placeholder="target address" v-model="targetAddress" />
+                  <input type="text" placeholder="tokenId" v-model="mintTokenId" />
+                  <input type="text" placeholder="ipfs URI" v-model="mintURI" />
+                </div>
+                <div v-if="mintResult">
+                  민팅결과: {{ mintResult }}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -66,6 +77,14 @@ export default {
       //tokenURI 변수
       tokenId: null,
       currentTokenId: "",
+
+      //mint 변수
+      targetAddress: "",
+      mintTokenId: null,
+      mintURI: "",
+      mintResult: null,
+
+      // event 감지
     }
   },
   methods: {
@@ -103,6 +122,27 @@ export default {
     async tokenURI() {
       const ipfsTokenURI = await this.connectedContract.tokenURI(this.tokenId);
       this.currentTokenId = ipfsTokenURI;
+    },
+
+    async mint() {
+      try {
+        const transaction = await this.connectedContract.mint(this.targetAddress, this.mintTokenId, this.mintURI);
+        this.mintResult = "생성 대기중";
+        await transaction.wait();
+        this.mintResult = transaction;
+        console.log(transaction);
+      } catch(e) {
+        console.log(e.response?.data);
+      }
+    },
+
+    async eventTransfer () {
+      try {
+        const eventResult = await this.connectedContract.on("Transfer");
+        console.log(eventResult);
+      } catch (e) {
+        console.log(e.response.data);
+      }
     }
   }
 }
