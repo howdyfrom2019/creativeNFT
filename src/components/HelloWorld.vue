@@ -1,8 +1,11 @@
 <template>
-  <div class="background" />
+  <div class="background"/>
   <h1 id="cssTest" class="topTitle">
     DEPLOY & RUN TEST
   </h1>
+  <a href="https://testnets.opensea.io/collection/icy-v3" target="_blank" style="width: fit-content; align-self: center">
+    <img class="opensea" src="https://play-lh.googleusercontent.com/32y5iFC7fULhuCqR8YfQSwtensqoVxBVbPDgTZOypQu3i-g5C7Tk-SBdgVcFh5Ako88" alt="link" />
+  </a>
   <div v-if="isInstallMetaMask" style="font-size: 16px; text-align: end; padding: 1rem; background: #606060; border-radius: 1rem">메타 마스크 설치 됨
     <div v-if="!currentConnectedAddress" style="font-size: 16px; text-align: end; padding-right: 1rem">
       <button v-on:click="connectWithMetaMask">메타마스크 연결</button>
@@ -19,7 +22,7 @@
               <div class="title">ownerOf</div>
               <div class="parameters">
                 <span>tokenId</span>
-                <input class="input" type="text" placeholder="tokenId" v-model="ownerOfTokenId" />
+                <input class="input" type="text" placeholder="tokenId" v-model="ownerOfTokenId"/>
                 <button class="button" v-on:click="ownerOf">Call</button>
               </div>
               <div class="result" v-if="ownerOfResult.length > 0">
@@ -30,7 +33,7 @@
               <div class="title">balanceOf</div>
               <div class="parameters">
                 <span>ownerAddress</span>
-                <input class="input" type="text" placeholder="tokenId" v-model="ownerAddress" />
+                <input class="input" type="text" placeholder="tokenId" v-model="ownerAddress"/>
                 <button class="button" v-on:click="balanceOf">Call</button>
               </div>
               <div class="result" v-if="ownerOfResult.length > 0">
@@ -41,7 +44,7 @@
               <div class="title">tokenURI</div>
               <div class="parameters">
                 <span>tokenId</span>
-                <input class="input" type="text" placeholder="tokenId" v-model="tokenId" />
+                <input class="input" type="text" placeholder="tokenId" v-model="tokenId"/>
                 <button class="button" v-on:click="tokenURI">Call</button>
               </div>
               <div class="result" v-if="ownerOfResult.length > 0">
@@ -53,15 +56,15 @@
               <div style="display: flex; flex-direction: column; gap: 16px">
                 <div class="parameters">
                   <span>Target Address</span>
-                  <input class="input" type="text" placeholder="target address" v-model="targetAddress" />
+                  <input class="input" type="text" placeholder="target address" v-model="targetAddress"/>
                 </div>
                 <div class="parameters">
                   <span>TokenID</span>
-                  <input class="input" type="text" placeholder="target address" v-model="mintTokenId" />
+                  <input class="input" type="text" placeholder="target address" v-model="mintTokenId"/>
                 </div>
                 <div class="parameters">
                   <span>IPFS URI</span>
-                  <input class="input" type="text" placeholder="target address" v-model="mintURI" />
+                  <input class="input" type="text" placeholder="target address" v-model="mintURI"/>
                   <button class="button" v-on:click="mint">Call</button>
                 </div>
               </div>
@@ -78,7 +81,7 @@
 </template>
 
 <script>
-import { ethers } from "ethers";
+import {ethers} from "ethers";
 import abi from "../assets/abi.json";
 
 export default {
@@ -88,7 +91,7 @@ export default {
   },
   data() {
     return {
-      isInstallMetaMask : window.ethereum !== null && window.ethereum.isMetaMask,
+      isInstallMetaMask: this.isMobile() || (window.ethereum !== null && window.ethereum.isMetaMask),
       currentConnectedAddress: document.cookie ? document.cookie.split("; ")[0].split("=")[1] : null,
       connectedContract: null,
 
@@ -112,16 +115,33 @@ export default {
     }
   },
   methods: {
+    isMobile() {
+      const mobileOs = ["Android", "webOS", "iPhone", "iPad", "iPod", "BlackBerry", "Phone"];
+      for (const os of mobileOs) {
+        if (navigator.userAgent.indexOf(os) > -1) return true;
+      }
+      return false;
+    },
+
     async connectWithMetaMask() {
-      try {
-        const account = await window.ethereum.request({ method: "eth_requestAccounts" });
-        this.currentConnectedAddress = account[0];
-        document.cookie=`currentConnectedAddress=${account[0]}`;
-        console.log(this.currentConnectedAddress);
-      } catch (e) {
-        console.log(e.response?.data);
+      if (!window.ethereum && this.isMobile()) this.connectMetamaskMobile();
+      else {
+        try {
+          const account = await window.ethereum.request({method: "eth_requestAccounts"});
+          this.currentConnectedAddress = account[0];
+          document.cookie = `currentConnectedAddress=${account[0]}`;
+          console.log(this.currentConnectedAddress);
+        } catch (e) {
+          console.log(e.response?.data);
+        }
       }
     },
+
+    connectMetamaskMobile() {
+      const dappUrl = window.location.href.split("//")[1].split("/")[0];
+      const metaMaskAppDeppLink = "https://metamask.app.link/dapp/howdyfrom2019.github.io/" + dappUrl;
+      window.open(metaMaskAppDeppLink, "_self");
+  },
 
     async connectContract() {
       const contractAddress = "0xF649adbe0eA31d11E17214Ad6Ad721B72F5d4822";
@@ -155,12 +175,12 @@ export default {
         await transaction.wait();
         this.mintResult = transaction;
         console.log(transaction);
-      } catch(e) {
+      } catch (e) {
         console.log(e.response?.data);
       }
     },
 
-    async eventTransfer () {
+    async eventTransfer() {
       try {
         const eventResult = await this.connectedContract.on("Transfer");
         console.log(eventResult);
@@ -175,6 +195,20 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300&display=swap');
+
+.opensea {
+  align-self: center;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  cursor: pointer;
+  filter: grayscale(1);
+  margin-bottom: 24px;
+}
+
+.opensea:hover {
+  filter: grayscale(0);
+}
 
 .function {
   background-color: #2c3e50;
