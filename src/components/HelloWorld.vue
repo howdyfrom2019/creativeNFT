@@ -36,7 +36,7 @@
                 <input class="input" type="text" placeholder="tokenId" v-model="ownerAddress"/>
                 <button class="button" v-on:click="balanceOf">Call</button>
               </div>
-              <div class="result" v-if="ownerOfResult.length > 0">
+              <div class="result" v-if="balance > 0">
                 balanceOf: {{ balance }}
               </div>
             </div>
@@ -47,7 +47,7 @@
                 <input class="input" type="text" placeholder="tokenId" v-model="tokenId"/>
                 <button class="button" v-on:click="tokenURI">Call</button>
               </div>
-              <div class="result" v-if="ownerOfResult.length > 0">
+              <div class="result" v-if="currentTokenId.length > 0">
                 tokenURI: {{ currentTokenId }}
               </div>
             </div>
